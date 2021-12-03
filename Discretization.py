@@ -2,8 +2,6 @@
 # coding: utf-8
 
 # In[15]:
-
-
 """
 #Simulating agent/robot spatial trajectories for 2 options/targets
 
@@ -17,10 +15,10 @@ import math
 
 
 #I_0 = [0.3,0.4,2,np.pi/2,0,0]; #initial conditions for all equations [z10,z20,B0,theta0,x0,y0]
-I_0 = [0.30,0.30,2.1,np.pi/2,0,0];
+I_0 = [0.34,0.30,2.1,np.pi/2,0,0];
 t0 = 0;
 tn = 600;
-h = 0.2;
+h = 0.1;
 
 
 
@@ -83,7 +81,7 @@ def IODE(I,t):
     
     #define constants
     d = 1; #damping coefficien
-    u = 1; #attention
+    u = 4; #attention
     b = 0; #input/bias about certain option(s)
     
     k = 1; #constant
@@ -115,7 +113,7 @@ def updateScore1 (z1,z2,B): #function to update z1
 
      #define constants
     d = 1; #damping coefficien
-    u = 1; #attention
+    u = 4; #attention
     b = 0; #input/bias about certain option(s)
     
     k = 1; #constant
@@ -135,7 +133,7 @@ def updateScore1 (z1,z2,B): #function to update z1
 def updateScore2 (z1,z2,B): #function to update s2
      #define constants
     d = 1; #damping coefficien
-    u = 1; #attention
+    u = 4; #attention
     b = 0; #input/bias about certain option(s)
     
     k = 1; #constant
@@ -155,7 +153,7 @@ def updateScore2 (z1,z2,B): #function to update s2
 def updateConnection(x,y,B): #function to update Beta
          #define constants
     d = 1; #damping coefficien
-    u = 1; #attention
+    u = 4; #attention
     b = 0; #input/bias about certain option(s)
     
     k = 1; #constant
@@ -178,7 +176,7 @@ def updateConnection(x,y,B): #function to update Beta
 def updateHeading (z1,z2,x,y,theta): #function to update theta
     #define constants
     d = 1; #damping coefficien
-    u = 1; #attention
+    u = 4; #attention
     b = 0; #input/bias about certain option(s)
     
     k = 1; #constant
@@ -203,7 +201,7 @@ def updateHeading (z1,z2,x,y,theta): #function to update theta
 def updatePosi(theta): #update x,y position of the robot
     
     d = 1; #damping coefficien
-    u = 1; #attention
+    u = 4; #attention
     b = 0; #input/bias about certain option(s)
     
     k = 1; #constant
