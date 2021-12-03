@@ -18,6 +18,8 @@ from matplotlib import pyplot as plt
 from scipy.integrate import solve_ivp
 from scipy.optimize import fsolve
 import math
+import os
+import imageio
 
 
 # In[3]:
@@ -26,7 +28,7 @@ import math
 phi10 = math.atan2(8,10)
 phi20 = math.atan2(8,-10);
 #I_0 = [0.3,0.4,2,np.pi/2,0,0]; #initial conditions for all equations [z10,z20,B0,theta0,x0,y0]
-I_0 = [0.3,0.3,2.1,np.pi/2,0,0];
+I_0 = [0.30,0.30,2.1,np.pi/2,0,0];
 T = 600; #time length
 
 #one agent, two targets
@@ -54,8 +56,8 @@ def IODE(t,I):
     #define constants
     d = 1; #damping coefficien
     u = 1; #attention
-    b = 0; #input/bias about certain option(s)
-    
+    g =  1; #gain for the distance bias term
+
     k = 1; #constant
     kp = 4; #constant (K_prime)
     
@@ -67,11 +69,16 @@ def IODE(t,I):
     yt2 = 8; #y coordinate of target 2
     
     phi = np.array([math.atan2((yt1-y),(xt1-x)),math.atan2((yt2-y),(xt2-x))]);
+
+    r = np.array([np.sqrt(np.square(xt1-x)+ np.square((yt1-y))),np.sqrt(np.square(xt2-x) + np.square(yt2-y))])
+    b1 = g/r[0];  # input/bias about certain option(s) --> for target 1
+    b2 = g/r[1];
+
     
     tau = 2; #timescale
       
-    return np.array([-d*z1 + u*np.sum(np.tanh(B*z2))+b, 
-                     -d*z2 + u*np.sum(np.tanh(B*z1))+b, 
+    return np.array([-d*z1 + u*np.sum(np.tanh(B*z2))+b1,
+                     -d*z2 + u*np.sum(np.tanh(B*z1))+b2,
                      (-B+kp*np.cos(k*(phi[0]-phi[1])))/tau, 
                      (np.sum(np.array([np.max(np.array([z1,0]))*np.sin((phi[0]-theta)/2),
                                       np.max(np.array([z2,0]))*np.sin((phi[1]-theta)/2)])))/tau, 
@@ -101,6 +108,40 @@ yt = It[5]; #y coordinate of robot
 
 
 # In[7]:
+
+def plotTraj(x,y):
+    fig,ax = plt.subplots()
+    filenames = []
+    for i in range(len(x)):
+        if i % 30 == 0:
+            ax.cla()
+            ax.plot(-10, 8, 'ks')
+            ax.plot(10, 8, 'ks')
+            ax.plot(I_0[4],I_0[5],'gs')
+            ax.set_title("Animated Trajectory")
+            ax.set_xlabel("X")
+            ax.set_ylabel("Y")
+            ax.scatter(x[i],y[i])
+            plt.pause(0.1)
+#saves the animated plot as a gif
+
+            """
+            filename = f'{i}.png'
+            filenames.append(filename)
+            # save frame
+            plt.savefig(filename)
+
+            # build gif
+    with imageio.get_writer('defaultparams_z1favored_taueqs4.gif', mode='I') as writer:
+           for filename in filenames:
+                image = imageio.imread(filename)
+                writer.append_data(image)
+
+            # Remove files
+    for filename in set(filenames):
+            os.remove(filename)
+        """
+plotTraj(xt,yt)
 
 
 #plot of robot pathing
@@ -142,7 +183,8 @@ plt.legend(bbox_to_anchor=(1, 1))
 
 lines = plt.plot(ts,z1t,ts,z2t)
 plt.legend(iter(lines), ('z1','z2'))
-plt.xlabel('t')  
+plt.xlabel('t')
+plt.show()
 #plt.legend()
 #print(z1t);
 #print(z2t);
