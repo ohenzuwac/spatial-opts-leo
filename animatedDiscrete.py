@@ -14,13 +14,13 @@ from scipy.integrate import solve_ivp
 from scipy.optimize import fsolve
 import math
 import time
-from matplotlib.animation import FuncAnimation
+import matplotlib.animation as animation
 
 #I_0 = [0.3,0.4,2,np.pi/2,0,0]; #initial conditions for all equations [z10,z20,B0,theta0,x0,y0]
 I_0 = [0.33,0.3,2.1,np.pi/2,0,0];
 t0 = 0;
 tn = 600;
-h = 0.2;
+h = 0.1;
 
 
 
@@ -37,8 +37,8 @@ def Euler(t0,I_0,h,tn):
     theta = np.zeros(t.size);
     x = np.zeros(t.size);
     y = np.zeros(t.size)
-    xplot = []
-    yplot = []
+    #xplot = []
+    #yplot = []
     
     z1[0] = I_0[0];
     z2[0]= I_0[1];
@@ -50,7 +50,7 @@ def Euler(t0,I_0,h,tn):
     #the vector I holds the solutions to the coupled ODEs
     I = [z1,z2,B,theta,x,y]
     
-    fig,ax = plt.subplots()
+    #fig,ax = plt.subplots()
 
 
 
@@ -63,18 +63,19 @@ def Euler(t0,I_0,h,tn):
         x[i+1] = x[i] + h*(updatePosi(theta[i]))[0];
         y[i+1] = y[i] + h*(updatePosi(theta[i]))[1];
 
-        if i % 100 == 0:
-            ax.cla()
-            ax.plot(-10, 8, 'ks')
-            ax.plot(10, 8, 'ks')
-            ax.plot(0,0,'gs')
-            ax.set_title("Animated Trajectory")
-            ax.set_xlabel("X")
-            ax.set_ylabel("Y")
-            ax.scatter(x[i],y[i])
-            plt.pause(0.1)
+        #if i % 100 == 0:
+            #animating
+          #  ax.cla()
+           # ax.plot(-10, 8, 'ks')
+           # ax.plot(10, 8, 'ks')
+           # ax.plot(0,0,'gs')
+           # ax.set_title("Animated Trajectory")
+           # ax.set_xlabel("X")
+           # ax.set_ylabel("Y")
+           # ax.scatter(x[i],y[i])
+           # plt.pause(0.1)
 
-            
+    return x,y,z1,z2,t
 
             
         
@@ -233,8 +234,76 @@ def updatePosi(theta):
     return np.array([ v*np.cos(theta), 
                      v*np.sin(theta)])
 
-Euler(t0,I_0,h,tn)
+
+x,y,z1,z2,t = Euler(t0,I_0,h,tn)
+
+fig,ax = plt.subplots()
+line, = ax.plot([], [],)
+lines = [];
+ax.plot(-10, 8, 'ks')
+ax.plot(10, 8, 'ks')
+ax.plot(0,0,'gs')
+
+def linesInit():
+    for line in lines:
+        line.set_data([], [])
+    return lines
+
+z1a,t1 = [],[]
+z2a,t2 = [],[]
+
+def animateTraj(i):
+    thisx = [0, x[i]]
+    thisy = [0, y[i]]
+
+    if i % 100 == 0:
+        line.set_data(thisx, thisy)
+
+    return line,
+
+def animateScore(i):
+    thisz1 = [0, z1[i]]
+    thisz2 = [0, z2[i]]
+    t1 = t2 = [0,t[i]]
+
+    if(i % 100 == 0):
+        z1a.append(thisz1)
+        z2a.append(thisz2)
+        t1.append(t)#something weird about these lines, check that I am implementing t correctly
+        t2.append(t)
+        xlist = [z1a,t1]
+        ylist = [z2a,t2]
+
+    for lnum, line in enumerate(lines):
+        line.set_data(xlist[lnum], ylist[lnum])  # set data for each line separately.
+    return lines
 
 
 
+def plotScore():
+    from time import time
 
+    t0 = time()
+    animateScore(0)
+    t1 = time()
+    interval = h - (t1 - t0)
+
+    ani = animation.FuncAnimation(
+        fig, animateScore, len(z1), interval=interval, blit=True, init_func=linesInit)
+    plt.show()
+
+def plotTraj():
+    from time import time
+
+    t0 = time()
+    animateTraj(0)
+    t1 = time()
+    interval = h - (t1 - t0)
+
+
+    ani = animation.FuncAnimation(
+        fig, animateTraj, len(y), interval=interval, blit=True)
+    plt.show()
+
+
+plotScore()
